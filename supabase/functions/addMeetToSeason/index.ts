@@ -1,0 +1,68 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.46.1";
+import z from "https://esm.sh/zod@3.23.2";
+
+const AddMeetToSeasonSchema = z.object({
+  meet: z.string().uuid(),
+  season: z.string().uuid(),
+});
+
+type AddMeetToSeasonInput = z.infer<typeof AddMeetToSeasonSchema>;
+
+Deno.serve(async (req) => {
+  try {
+    const body = await req.json();
+    const parsedBody = AddMeetToSeasonSchema.safeParse(body);
+
+    if (!parsedBody.success) {
+      return new Response(
+        JSON.stringify({ error: "Invalid input", details: parsedBody.error.format() }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
+    const { meet, season } = parsedBody.data;
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      { auth: { persistSession: false } }
+    );
+
+    const { data, error } = await supabase
+      .from("meets_to_seasons")
+      .insert({ meet, season })
+      .select()
+      .single();
+
+    if (error) {
+      return new Response(
+        JSON.stringify({ error: error.message }),
+        { status: 500, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
+    return new Response(
+      JSON.stringify({ success: true, season: data }),
+      { status: 201, headers: { "Content-Type": "application/json" } },
+    );
+
+  } catch (err) {
+    console.error(err);
+    return new Response(
+      JSON.stringify({ error: "Internal server error" }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
+  }
+});
+
+
+/* To invoke locally:
+
+  1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
+  2. Make an HTTP request:
+
+  curl -X POST "https://yswwvmzncodhxafkzswz.supabase.co/functions/v1/addMeetToSeason" \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlzd3d2bXpuY29kaHhhZmt6c3d6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzODMwNDcsImV4cCI6MjA4MDk1OTA0N30.PbXFC1FLzN8oEiUCIuL7u662SteIEcsxuGff9icHZ9A' \
+  -H "Content-Type: application/json" \
+  -d '{"meet": "7c6d0a72-3d94-48fc-8f8f-256400de247e", "season": "58269bd3-9896-4790-a528-52ac2ba7eae3"}'    
+*/
