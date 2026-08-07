@@ -178,7 +178,7 @@ export default function AthletesClient({ id }: { id: string }) {
         {[
           { label: "Meets", value: totalMeets },
           { label: "Events", value: totalEvents },
-          { label: "Points", value: totalPoints },
+          { label: "Points", value: Number(totalPoints.toFixed(2)) },
           { label: "PTS / Event", value: pointsPerEvent },
           { label: "PTS / Meet", value: pointsPerMeet },
         ].map(({ label, value }) => (
