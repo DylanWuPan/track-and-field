@@ -365,7 +365,8 @@ export default function LeaderboardClient({ id }: { id: string }) {
                 </div>
 
                 <div className="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400">
-                  {sortOption === "totalPoints" && `${athlete.totalPoints} pts`}
+                  {sortOption === "totalPoints" &&
+                    `${athlete.totalPoints.toFixed(2)} pts`}
                   {sortOption === "pointsPerMeet" &&
                     `${athlete.pointsPerMeet.toFixed(2)} PPM`}
                   {sortOption === "pointsPerEvent" &&
@@ -378,7 +379,7 @@ export default function LeaderboardClient({ id }: { id: string }) {
               <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-x-4 gap-y-1 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
                 <span>
                   <span className="font-semibold">Points:</span>{" "}
-                  {athlete.totalPoints}
+                  {athlete.totalPoints.toFixed(2)}
                 </span>
                 <span>
                   <span className="font-semibold">Events:</span>{" "}
